@@ -1,7 +1,9 @@
-streamlit==1.31.0
-pandas==2.2.0
-geopandas==0.14.1
-plotly==5.18.0
-openpyxl==3.1.2
-shapely==2.0.2
-fiona==1.9.5
+streamlit==1.38.0
+geopandas==0.14.4
+shapely==2.0.4
+fiona==1.9.6
+pyproj==3.6.1
+pandas==2.2.2
+plotly==5.24.1
+folium==0.16.0
+streamlit-folium==0.20.0
