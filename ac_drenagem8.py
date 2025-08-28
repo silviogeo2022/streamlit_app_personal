@@ -176,7 +176,7 @@ with col2:
 # -----------------------
 # GRÁFICOS
 # -----------------------
-st.markdown("### 📈 Indicadores de Consumo de Água")
+st.markdown("### 📈 Indicadores de Drenagem")
 col1, col2 = st.columns(2)
 
 def pie(dataframe, col, title):
@@ -252,4 +252,5 @@ st.write("""
 - Abertura de canaletas
 - Limpeza e manutenção dos sistemas implantados
 - Fiscalização de esgotamento irregular
+
 """)
