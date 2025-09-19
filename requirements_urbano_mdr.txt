@@ -15,5 +15,5 @@ python-dotenv==1.0.1
 # Se você usar a verificação de imagem (Pillow), descomente:
 
 # Pillow==10.4.0
-runtime = 3.12.6
+
 
