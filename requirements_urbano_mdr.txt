@@ -4,7 +4,7 @@ Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.32
 
 # Postgres driver (mais simples para deploy)
-psycopg2-binary==3.2
+psycopg[binary]==3.2.1
 
 # Servidor WSGI para produção (Linux)
 gunicorn==21.2.0
@@ -15,5 +15,6 @@ python-dotenv==1.0.1
 # Se você usar a verificação de imagem (Pillow), descomente:
 
 # Pillow==10.4.0
+
 
 
