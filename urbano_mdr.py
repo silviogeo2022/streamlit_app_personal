@@ -15,30 +15,51 @@ app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key')  # necessário para flash
 
 # ============ Config do Banco ============
-DB_USER = os.getenv('PGUSER', 'postgres')
-DB_PASSWORD = os.getenv('PGPASSWORD', 'Silvio@2025')     # ajuste se necessário
-DB_HOST = os.getenv('PGHOST', 'localhost')
-DB_PORT = int(os.getenv('PGPORT', 5432))
-DB_NAME = os.getenv('PGDATABASE', 'postgres')
+import os
+from sqlalchemy.engine import URL
+
+# ========= Seus dados / defaults =========
+DB_USER   = os.getenv('PGUSER', 'postgres')
+DB_PASSWORD = os.getenv('PGPASSWORD', 'Silvio@2025')  # em produção, prefira não ter default
+DB_HOST   = os.getenv('PGHOST', 'localhost')
+DB_PORT   = int(os.getenv('PGPORT', 5432))
+DB_NAME   = os.getenv('PGDATABASE', 'postgres')
 DB_SCHEMA = os.getenv('DB_SCHEMA', 'urbano')
 
-# Em Windows/PT-BR, mensagens do servidor podem vir em CP1252
-CLIENT_ENCODING = os.getenv('CLIENT_ENCODING', 'WIN1252')
+# Em ambiente Linux/Render prefira UTF8
+CLIENT_ENCODING = os.getenv('CLIENT_ENCODING', 'UTF8')
 
-db_url = URL.create(
-    "postgresql+psycopg2",
-    username=DB_USER,
-    password=DB_PASSWORD,
-    host=DB_HOST,
-    port=DB_PORT,
-    database=DB_NAME,
-)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+# ========= Config Flask-SQLAlchemy =========
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "connect_args": {"options": f"-c client_encoding={CLIENT_ENCODING}"}
 }
+
+# Prioriza DATABASE_URL do Render/Heroku e força o driver psycopg3
+db_uri = os.getenv("DATABASE_URL")
+if db_uri:
+    # Render/Heroku podem fornecer "postgres://..."
+    if db_uri.startswith("postgres://"):
+        db_uri = db_uri.replace("postgres://", "postgresql+psycopg://", 1)
+    elif db_uri.startswith("postgresql://") and "+psycopg" not in db_uri and "+psycopg2" not in db_uri:
+        db_uri = db_uri.replace("postgresql://", "postgresql+psycopg://", 1)
+    elif "+psycopg2" in db_uri:
+        db_uri = db_uri.replace("+psycopg2", "+psycopg", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+else:
+    # Fallback usando suas variáveis PG*
+    db_url = URL.create(
+        "postgresql+psycopg",   # psycopg3
+        username=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT,
+        database=DB_NAME,
+    )
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+
+# Depois deste bloco, instancie o SQLAlchemy:
+# db = SQLAlchemy(app)
 # app.config['SQLALCHEMY_ECHO'] = True  # descomente para ver SQL no console
 
 # ============ Uploads ============
@@ -236,5 +257,6 @@ if __name__ == '__main__':
                 ADD COLUMN IF NOT EXISTS criado_em  TIMESTAMPTZ DEFAULT NOW()
             '''))
         db.create_all()
+
 
     app.run(debug=True)
